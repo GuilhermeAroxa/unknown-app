@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,7 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useI18n } from "@/lib/i18n"
 import { LanguageSwitcher } from "@/components/language-switcher"
 
-export default function HostPage() {
+function HostPageContent() {
   const { t } = useI18n()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -288,5 +288,17 @@ export default function HostPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function HostPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <HostPageContent />
+    </Suspense>
   )
 }
