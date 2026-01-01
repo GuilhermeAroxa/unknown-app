@@ -34,7 +34,7 @@ const roles = [
     icon: UserX,
     color: "text-destructive",
     hasNumber: false,
-    answersQuestion: false,
+    answersQuestion: true,
     canReveal: false,
   },
 ]
@@ -654,6 +654,7 @@ export default function PlayerContent() {
             {orderedAnswers.map((ans, index) => {
               const isRevealed = revealedNumber === ans.player
               const estimatedNumber = Math.round((index / (orderedAnswers.length - 1)) * 100)
+              const displayNumber = typeof ans.number === 'number' ? ans.number : '?'
 
               return (
                 <Card
@@ -683,7 +684,7 @@ export default function PlayerContent() {
                           )}
                           {isRevealed && (
                             <Badge variant="secondary" className="text-lg font-bold">
-                              {t("player.realNumber")} {ans.number}
+                              {t("player.realNumber")} {displayNumber}
                             </Badge>
                           )}
                         </div>
@@ -754,7 +755,9 @@ export default function PlayerContent() {
 
   if (gamePhase === "results") {
     const isInfiltrator = currentRole.name === "infiltrator"
-    const correctOrder = [...answers].sort((a, b) => a.number - b.number)
+    const correctOrder = [...answers]
+      .filter((a) => typeof a.number === 'number')
+      .sort((a, b) => (a.number ?? 0) - (b.number ?? 0))
     const citizensWon = winner === 'citizens'
 
     return (
