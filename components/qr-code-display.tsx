@@ -13,7 +13,9 @@ export function QRCodeDisplay({ roomCode }: QRCodeDisplayProps) {
   return (
     <div className="flex justify-center">
       <Card className="p-6 bg-background">
-        <img src={qrCodeUrl || "/placeholder.svg"} alt="QR Code para entrar na sala" className="w-64 h-64 rounded-lg" />
+        <a href={`/join?room=${encodeURIComponent(roomCode)}`}>
+          <img src={qrCodeUrl || "/placeholder.svg"} alt="QR Code para entrar na sala" className="w-64 h-64 rounded-lg" />
+        </a>
       </Card>
     </div>
   )

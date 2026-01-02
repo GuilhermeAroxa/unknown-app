@@ -2,22 +2,29 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useI18n } from "@/lib/i18n"
 import { LanguageSwitcher } from "@/components/language-switcher"
 
 export default function JoinPage() {
   const { t } = useI18n()
+  const searchParams = useSearchParams()
+  const initialRoom = searchParams?.get("room") ?? ""
   const [name, setName] = useState("")
-  const [roomCode, setRoomCode] = useState("")
+  const [roomCode, setRoomCode] = useState(initialRoom.toUpperCase())
   const router = useRouter()
+
+  useEffect(() => {
+    const r = searchParams?.get("room") ?? ""
+    setRoomCode(r.toUpperCase())
+  }, [searchParams])
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -69,7 +76,7 @@ export default function JoinPage() {
               type="text"
               placeholder={t("join.codePlaceholder")}
               value={roomCode}
-              onChange={(e) => setRoomCode(e.target.value)}
+              onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
               className="h-12 text-lg uppercase tracking-widest text-center"
               maxLength={8}
               required
