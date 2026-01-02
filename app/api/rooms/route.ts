@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       answers: [],
       readyPlayers: [],
       orders: [],
-      theme: 'Praia',
+      theme: '',
       createdAt: new Date().toISOString()
     }
 

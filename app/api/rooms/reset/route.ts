@@ -23,8 +23,7 @@ export async function POST(request: NextRequest) {
     roomData.readyPlayers = []
     roomData.orders = []
     roomData.winner = null
-
-    // Resetar roles para null (serão atribuídas ao iniciar)
+    roomData.theme = null
     roomData.players.forEach((player: { role: string | null; number: number | null }) => {
       player.role = null
       player.number = null

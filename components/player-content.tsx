@@ -63,7 +63,7 @@ export default function PlayerContent() {
   const [currentRole, setCurrentRole] = useState<any>(null)
   const [secretNumber, setSecretNumber] = useState<number | null>(null)
   const [hasJoined, setHasJoined] = useState(false)
-  const [theme] = useState("Praia")
+  const [themeId, setThemeId] = useState("")
   const [hostName, setHostName] = useState("")
   const [gamePhase, setGamePhase] = useState<
     | "waiting"
@@ -174,6 +174,9 @@ export default function PlayerContent() {
 
           if (data.host) {
             setHostName(data.host)
+          }
+          if (data.theme) {
+            setThemeId(data.theme)
           }
           if (data.readyPlayers) {
             setReadyCount(data.readyPlayers.length)
@@ -492,19 +495,6 @@ export default function PlayerContent() {
           </div>
 
           <Card className="p-8 space-y-8 bg-card border-primary/30 neon-border animate-in fade-in duration-500">
-            {isInfiltrator ? (
-              <div className="text-center space-y-6">
-                <div className="flex justify-center">
-                  <div className="p-6 rounded-full bg-destructive/20">
-                    <UserX className="w-16 h-16 text-destructive" />
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <h2 className="text-3xl font-bold text-destructive neon-glow">{t("player.youAreInfiltrator")}</h2>
-                  <p className="text-xl text-muted-foreground leading-relaxed">{t("player.infiltratorInfo")}</p>
-                </div>
-              </div>
-            ) : (
               <div className="text-center space-y-6">
                 <div className="flex justify-center">
                   <div className="p-6 rounded-full bg-primary/20">
@@ -513,11 +503,10 @@ export default function PlayerContent() {
                 </div>
                 <div className="space-y-3">
                   <h2 className="text-2xl font-bold">{t("player.roundTheme")}</h2>
-                  <p className="text-6xl font-bold text-primary neon-glow">{theme}</p>
+                  <p className="text-6xl font-bold text-primary neon-glow">{t(`themes.${themeId}`)}</p>
                 </div>
                 <p className="text-lg text-muted-foreground leading-relaxed">{t("player.identifyInfiltrator")}</p>
               </div>
-            )}
           </Card>
 
           <Button
@@ -545,7 +534,7 @@ export default function PlayerContent() {
 
           <Card className="p-6 space-y-4 bg-card">
             <label htmlFor="answer" className="font-semibold text-lg block">
-              {t("player.yourTheme")} {theme}, {t("player.yourNumber")} {secretNumber}
+              {t("player.yourTheme")} {t(`themes.${themeId}`)} {currentRole.name !== "infiltrator" ? ", " + t("player.yourNumber") : ""} {secretNumber}
             </label>
             <Textarea
               id="answer"
@@ -647,13 +636,13 @@ export default function PlayerContent() {
           </div>
 
           <Card className="p-6 space-y-4 bg-muted/50 border-primary/30">
-            <p className="text-base leading-relaxed">{t("player.orderingInfo")}</p>
+            <div className="text-center space-y-2">
+              <p className="text-base leading-relaxed">"{t(`themes.${themeId}`)}"</p>
+            </div>
           </Card>
-
           <div className="space-y-2">
             {orderedAnswers.map((ans, index) => {
               const isRevealed = revealedNumber === ans.player
-              const estimatedNumber = Math.round((index / (orderedAnswers.length - 1)) * 100)
               const displayNumber = typeof ans.number === 'number' ? ans.number : '?'
 
               return (
@@ -671,7 +660,7 @@ export default function PlayerContent() {
                     <GripVertical className="w-5 h-5 text-muted-foreground" />
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold">{ans.player}</span>
+                        <span className="font-semibold">{ans.text}</span>
                         <div className="flex items-center gap-2">
                           {isObserver && !isRevealed && (
                             <Badge
@@ -689,7 +678,7 @@ export default function PlayerContent() {
                           )}
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">{ans.text || t("player.noAnswer")}</p>
+                      <p className="text-sm text-muted-foreground">{ans.player || t("player.noAnswer")}</p>
                     </div>
                   </div>
                 </Card>
@@ -798,7 +787,7 @@ export default function PlayerContent() {
                 <div className="space-y-2">
                   {correctOrder.map((ans) => (
                     <div key={ans.player} className="flex justify-between items-center">
-                      <span>{ans.player}</span>
+                      <span>{ans.text}</span>
                       <Badge variant="outline">{ans.number}</Badge>
                     </div>
                   ))}
