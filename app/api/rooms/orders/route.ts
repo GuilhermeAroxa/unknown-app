@@ -23,14 +23,17 @@ export async function POST(request: NextRequest) {
 
     // Verificar se já submeteu
     if (!roomData.orders) roomData.orders = []
-    const existingOrder = roomData.orders.find((o: any) => o.playerName === playerName)
-    if (existingOrder) {
-      return NextResponse.json({ error: 'Order already submitted' }, { status: 400 })
+    const existingIndex = roomData.orders.findIndex((o: any) => o.playerName === playerName)
+    if (existingIndex >= 0) {
+      // Atualizar ordem existente em vez de rejeitar
+      console.log('Updating existing order for player:', playerName)
+      roomData.orders[existingIndex] = { playerName, order: orderedAnswers }
+    } else {
+      roomData.orders.push({ playerName, order: orderedAnswers })
     }
 
-    roomData.orders.push({ playerName, order: orderedAnswers })
-
     await redis.set(roomKey, JSON.stringify(roomData))
+    console.log('Order submitted for player:', playerName, 'Total orders:', roomData.orders.length)
 
     return NextResponse.json({ success: true })
   } catch (error) {

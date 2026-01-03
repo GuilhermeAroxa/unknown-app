@@ -312,6 +312,48 @@ export default function PlayerContent() {
   }, [gamePhase, roomId, playerName])
 
   useEffect(() => {
+    // Se está em order-submitted, tentar reenviar a ordem a cada 3 segundos até ter sucesso
+    if (gamePhase === "order-submitted" && roomId && playerName) {
+      let retryCount = 0
+      const maxRetries = 10 // 30 segundos
+      
+      const retrySubmitOrder = async () => {
+        try {
+          const response = await fetch('/api/rooms/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomId, playerName, orderedAnswers })
+          })
+          
+          if (response.ok) {
+            console.log('Order retry successful for:', playerName)
+            return true
+          } else {
+            console.log('Order retry failed, will retry again...')
+            return false
+          }
+        } catch (error) {
+          console.error('Order retry error:', error)
+          return false
+        }
+      }
+
+      const interval = setInterval(async () => {
+        retryCount++
+        const success = await retrySubmitOrder()
+        if (success || retryCount >= maxRetries) {
+          clearInterval(interval)
+          if (retryCount >= maxRetries) {
+            console.warn('Max retries reached for order submission')
+          }
+        }
+      }, 3000)
+
+      return () => clearInterval(interval)
+    }
+  }, [gamePhase, roomId, playerName, orderedAnswers])
+
+  useEffect(() => {
     if (gamePhase === "ordering" && roomId && answers.length === 0) {
       // Buscar respostas automaticamente quando entra na fase de ordenação
       const fetchAnswers = async () => {
@@ -327,8 +369,6 @@ export default function PlayerContent() {
       fetchAnswers()
     }
   }, [gamePhase, roomId, answers.length])
-
-  const handleDragStart = (index: number) => {
     setDraggedItem(index)
   }
 
@@ -689,14 +729,22 @@ export default function PlayerContent() {
           <Button onClick={async () => {
             if (roomId && playerName) {
               try {
-                await fetch('/api/rooms/orders', {
+                const response = await fetch('/api/rooms/orders', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ roomId, playerName, orderedAnswers })
                 })
-                setGamePhase("order-submitted")
+                if (response.ok) {
+                  console.log('Order submitted successfully:', playerName)
+                  setGamePhase("order-submitted")
+                } else {
+                  const error = await response.text()
+                  console.error('Failed to submit order:', error)
+                  alert(`Erro ao enviar ordenação: ${error}`)
+                }
               } catch (error) {
                 console.error('Error submitting order:', error)
+                alert(`Erro ao enviar ordenação: ${error}`)
               }
             }
           }} className="w-full h-14 text-lg neon-border" size="lg">
